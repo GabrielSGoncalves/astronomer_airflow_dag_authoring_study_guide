@@ -3,3 +3,7 @@ In this repository we are going to explore the content required on the Airflow D
 
 ## 1. Installing Docker
 One of the easiest ways to deploy Airflow is through Docker containers. To do it, we first need to install Docker and Docker Compose.
+
+## References
+1. [How To Install and Use Docker on Ubuntu ()Digital Ocean)](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-on-ubuntu-20-04)
+2. [How To Install and Use Docker Compose on Ubuntu (Digital Ocean)](https://www.digitalocean.com/community/tutorials/how-to-install-and-use-docker-compose-on-ubuntu-20-04)
