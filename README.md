@@ -27,7 +27,7 @@ astronomer/astro-cli info found version: 1.21.0 for v1.21.0/linux/amd64
 astronomer/astro-cli info installed /usr/local/bin/astro
 ```
 To check if you install Astro CLI with success just type `astro` on your terminal and you should get:
-```bash
+```
 
  ________   ______   _________  ______    ______             ______   __        ________
 /_______/\ /_____/\ /________/\/_____/\  /_____/\           /_____/\ /_/\      /_______/\
@@ -68,9 +68,60 @@ Use "astro [command] --help" for more information about a command.
 
 ```
 
+## 3. Creating a repository for local Airflow deployment
+After installing all the required tools mentioned above (Docker, Docker Compose and Astro CLI) we are ready for structuring our local repository. To do it, you first can create a new folder (I named my `astronomer_airflow_dag_authoring_study_guide`), that we are going to use as our repository folder:
+```bash
+mkdir airflow_dag_authoring_study_guide
+cd airflow_dag_authoring_study_guide
+```
+The next step is going to show us how easy is to deploy a test Airflow on your local environment.
+```bash
+astro dev init
+``` 
+The previous commands creates all the needed files and folders for your local Airflow deployment, including folders for your dags, plugins, include and tests, and config files like Dockerfile image and DAG examples. To have a sense of the repository boilerplate structure you can run the command `tree` on your terminal.
+```bash
+tree
+``` 
+```
+.
+├── airflow_settings.yaml
+├── dags
+│   ├── example_dag_advanced.py
+│   └── example_dag_basic.py
+├── Dockerfile
+├── include
+├── packages.txt
+├── plugins
+├── README.md
+├── requirements.txt
+└── tests
+    └── dags
+        └── test_dag_example.py
+
+5 directories, 8 files
+
+``` 
+We are going to have a deeper understanding of each one of the components inside your repository in the following sessions. For now, we can simply run the next command to deploy our local Airflow infrastructure using Docker Containers.
+```bash
+astro dev start
+```
+With previous command you pull the images of each one of the main components of Airflow (Postgres-Database, Triggerer, Scheduler, Webserver) and starts its containers. 
+```
+Airflow is starting up!
+
+Project is running! All components are now available.
+
+Airflow Webserver: http://localhost:8080
+Postgres Database: localhost:5432/postgres
+The default Airflow UI credentials are: admin:admin
+The default Postgres DB credentials are: postgres:postgres
+
+``` 
+
 
 
 ## References
 1. [Get Docker (Docker Offical Documentation)](https://docs.docker.com/desktop/install/ubuntu/)
 2. [Overview of installing Docker Compose (Docker Offical Documentation)](https://docs.docker.com/compose/install/)
 3. [Running Airflow in Docker (Apache Airflow Offical Documentation)](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html)
+4. [Install Astro CLI (Astronomer Docs)](https://docs.astronomer.io/astro/cli/install-cli?tab=linux#install-the-astro-cli)
