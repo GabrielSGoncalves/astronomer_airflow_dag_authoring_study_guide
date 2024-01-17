@@ -118,6 +118,20 @@ The default Postgres DB credentials are: postgres:postgres
 
 ``` 
 
+You can check the running containers with the following command:
+
+```bash
+astro dev ps
+```
+```
+Name									State		Ports
+astronomer-airflow-dag-authoring-study-guide_c76029-webserver-1		running		8080
+astronomer-airflow-dag-authoring-study-guide_c76029-scheduler-1		running
+astronomer-airflow-dag-authoring-study-guide_c76029-triggerer-1		running
+astronomer-airflow-dag-authoring-study-guide_c76029-postgres-1		running		5432
+```
+
+As you can see, we have 4 containers representing Airflow main components: Scheduler, Trigger, Webserver and Database (Postgres). If you want to understand this architecture deeply I highly recommend you checking out [Astronomer Airflow components documentation](https://docs.astronomer.io/learn/airflow-components). 
 
 
 ## References
@@ -125,3 +139,4 @@ The default Postgres DB credentials are: postgres:postgres
 2. [Overview of installing Docker Compose (Docker Offical Documentation)](https://docs.docker.com/compose/install/)
 3. [Running Airflow in Docker (Apache Airflow Offical Documentation)](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html)
 4. [Install Astro CLI (Astronomer Docs)](https://docs.astronomer.io/astro/cli/install-cli?tab=linux#install-the-astro-cli)
+5. [Airflow Components (Astronomer)](https://docs.astronomer.io/learn/airflow-components) 
