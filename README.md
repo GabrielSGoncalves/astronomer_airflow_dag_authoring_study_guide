@@ -133,6 +133,20 @@ astronomer-airflow-dag-authoring-study-guide_c76029-postgres-1		running		5432
 
 As you can see, we have 4 containers representing Airflow main components: Scheduler, Trigger, Webserver and Database (Postgres). If you want to understand this architecture deeply I highly recommend you checking out [Astronomer Airflow components documentation](https://docs.astronomer.io/learn/airflow-components). 
 
+## Defining your DAGs
+- 
+- DAG parsing, need to have airflow or dag on the file name
+- You can change this behaviour by changing the parameter DAG_DISCOVERY_SAFE_MODE on the setting file to False and Airflow would parse all your files. This may impact the performance of your deploy, so it's not recommended.
+- You can add `.airflowignore` file to list all the folders and files that you want Airflow to avoid parsing. It's same logic used for .gitignore file.
+- The recommended structure for your DAG code is using the context manager (`with` statement)
+```python
+with DAG(dag_id=) as dag:
+```
+- Important parameters:
+  1. dag_id : unique name for your dag. Important to note that if you have 2 DAGs with the same dag_id you won't be able to define which one was parsed
+  2. description: Simple text to describe the purpose of your DAG
+  3. start_date: The initial date for yout DAG to start being scheduled. You can also customize start_date for your DAGs tasks individually.
+  4. schedule_interval:
 
 ## References
 1. [Get Docker (Docker Offical Documentation)](https://docs.docker.com/desktop/install/ubuntu/)
