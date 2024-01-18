@@ -1,6 +1,10 @@
 # Astronomer Airflow DAG Authoring Study Guide
 In this repository we are going to explore the content required on the Airflow DAG Authoring Certification exam from Astronomer. The approach is to use the current README file as a guide for exploring the subjects, and also structure a repository to deploy Airflow locally to test core features.
 
+## A few important notes
+1. During this guide I'm going to use the expression "DAGs" and "data pipelines" as the same concept, as DAGs are abstractions for data pipelines inside Airflow.
+
+
 ## 1. Installing Docker
 One of the easiest ways to deploy Airflow is through Docker containers. To do it, we first need to install Docker and Docker Compose. The recommended way is by following the official tutorials, for [Docker](https://docs.docker.com/desktop/install/ubuntu/) and for [Docker Compose](https://docs.docker.com/compose/install/). After installing both tools, try the following terminal commands to make sure the installations were successful:
 ```bash
@@ -150,6 +154,7 @@ with DAG(dag_id=) as dag:
   5. dag_run_timeout: Defines your DAG execution time limit, using timedelta objects
   6. tags: Customized tags related to your DAGs, helps you organize your data pipelines by groups, users or any other subject needed.
   7. catchup: Defines if your want to schedule automatically DAGs runs between the start_date and the current date. It's recommended to set it to False, in order to control the execution of past time DAG runs.
+  8. max_active_runs: Thee total number of DAG runs that you can run at the same time. This parameter is important whenever you want to perform a backfill and your `catchup` equals to True (more details on the session bellow).
 
 Below is a example of a DAG file `dag_customer_ingestion.py` with the mentioned parameters defined
   ```python
@@ -179,9 +184,35 @@ second and following DAG runs = execution_date + schedule_interval
 ```
 Let's go through a quick example to understand it better.
 Imagine you define your 
+## REVIEW THE SCHEDULING CONCEPTS
+
+## CRON vs Timedelta
+- CRON expression is stateless
+- Timedelta is stateful 
+- With CRON expression, the first DAG run is triggered based on the `start_date` addeing the interval
+
+## Task indepotence and determinism
+A task can be considered idepotent and deterministic if executed multiple times you consitently get the same results (outputs). And deterministic if the output of a task is the same whenever provided a specific input, showing no side effects.
+In practice, we can illustrate it with a SQL DDL:
+```sql
+CREATE TABLE users (...)
+```
+If we run the above statement twice, the first time it would succeed, but the second time it would raise an error, because the table already exists. To make idepotent and deterministic you could use:
+```sql
+CREATE TABLE IF NOT EXISTS users (...)
+```
+
+Another important aspect of having idepotent task is that if your pipeline fails in any specific task, you could rerun the whole pipeline generating no side effects like duplicated rows or new error messages. Designing idepotent data pipelines is probably one of the most valuable skills a Data Engineer can display.
 
 
+## Backfilling
+Backfilling is the process scheduling DAG runs from a specific period in the past. 
 
+## REVIEW BACKFILLING CONCEPTS
+
+```bash
+airflow dags backfill -s 2024-01-01 -e 2024-01-14
+```
 ## References
 1. [Get Docker (Docker Offical Documentation)](https://docs.docker.com/desktop/install/ubuntu/)
 2. [Overview of installing Docker Compose (Docker Offical Documentation)](https://docs.docker.com/compose/install/)
