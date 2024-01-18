@@ -146,7 +146,41 @@ with DAG(dag_id=) as dag:
   1. dag_id : unique name for your dag. Important to note that if you have 2 DAGs with the same dag_id you won't be able to define which one was parsed
   2. description: Simple text to describe the purpose of your DAG
   3. start_date: The initial date for yout DAG to start being scheduled. You can also customize start_date for your DAGs tasks individually.
-  4. schedule_interval:
+  4. schedule_interval: Defines the frequency of the DAG runs. You can use Airflow expressions (like @daily), CRON expressions or timedelta objects.
+  5. dag_run_timeout: Defines your DAG execution time limit, using timedelta objects
+  6. tags: Customized tags related to your DAGs, helps you organize your data pipelines by groups, users or any other subject needed.
+  7. catchup: Defines if your want to schedule automatically DAGs runs between the start_date and the current date. It's recommended to set it to False, in order to control the execution of past time DAG runs.
+
+Below is a example of a DAG file `dag_customer_ingestion.py` with the mentioned parameters defined
+  ```python
+  from Airflow import DAG
+
+  from datetime import datetime, timedelta
+
+  with DAG(
+      "customer_1_ingestion",
+      description="Data pipeline responsible for batch ingestion of customer 1 data",
+      start_date=datetime(2020,1,1),
+      schedule_interval='@daily',
+      dagrun_timeout=timedelta(minutes=45),
+      tags=['customer_1', 'data_ingestion'],
+      catchup=False
+      ) as dag:
+
+      # define the tasks below ...   
+  ```
+
+## DAG scheduling
+DAG scheduling can be a little bit tricky if you don't understand a few important concepts presented as DAG parameters above. The parameter `start_date` defines the date the DAG start being scheduled, and the `schedule_interval` the frequency your DAG runs are executed. Also, the first `start_date` is equal to the `execution date`. But the first time your DAG is going to be triggered is actually the defined `start_date` added by the `schedule_interval`. 
+```
+first execution_date = start_date 
+first triggered DAG run = start_date or execution_date + schedule_interval
+second and following DAG runs = execution_date + schedule_interval
+```
+Let's go through a quick example to understand it better.
+Imagine you define your 
+
+
 
 ## References
 1. [Get Docker (Docker Offical Documentation)](https://docs.docker.com/desktop/install/ubuntu/)
