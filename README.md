@@ -206,13 +206,64 @@ Another important aspect of having idepotent task is that if your pipeline fails
 
 
 ## Backfilling
-Backfilling is the process scheduling DAG runs from a specific period in the past. 
+Backfilling is the process scheduling DAG runs from a specific period in the past. In order to execute a backfilling you have 
 
 ## REVIEW BACKFILLING CONCEPTS
 
 ```bash
 airflow dags backfill -s 2024-01-01 -e 2024-01-14
 ```
+
+## Variables
+Airflow provides a key-value store for you to centrally store your variables, and avoid harcoding it to your DAG, or creating a .env file. To create your variables you have 3 methods:
+1. Webserver UI
+2. Airflow CLI
+3. Airflow REST API
+
+![AIRFLOW UI VARIABLES]()
+
+After creating your variables, to access it you only have to import inside your Python modules:
+```python
+from airflow.models import Variables
+s3_staging_bucket = Variable.get('s3_staging_bucket_name')
+```
+
+If you are storing a sensitive information as variable, in order to prevent it to be displayed on the webserver UI or in the logs, you can simply add specific keywords like `password`, `passwd`, `api_key`, `api key` or `secret` to hide it. You can also customize the secret keywords for identify sensitive variables by changing the parameter  `sensitive_var_conn_names` on the Airflow settings file. 
+
+One important think to note is that Airflow is storing all your defined variables on the metadata database (Postgres container). And every time your DAG file is parsed (by the scheduler, defined by the parameter `min_file_processing_interval` on your Airflow settings file), a new connection to your Postgres database is created, and it may impact your Airflow deployment performance. To prevent it from happening you can get the variables inside the functions definitions, not before instatiating the DAG.
+```python
+from airflow.models import Variables
+
+def _extract():
+    s3_staging_bucket = Variable.get('s3_staging_bucket_name')
+    return s3_staging_bucket
+
+``` 
+
+You can also prevent useless connection to the Posgres database, whenever you need more than one value for a specific task, you can create a new variable with a JSON as value. To access it as a dictionary, you only need to specify a parameter `deserialize_json=True`),
+```python
+from airflow.models import Variables
+
+json_variable_test = Variable.get('json_var_key', deserialize_json=True)
+```
+And finally, whenever you want to pass a variable as the parameter of your tasks, avoiding the creation of connections to the Postgres database, you can use the template engine:
+```python
+# Definition of the DAGs parameters
+# ...
+    extract = PythonOperator(
+        task_id='extract',
+        python_callable=extract,
+        op_args=["{{ var.json.json_variable_test.json_key}}"]
+    )
+```
+### Environment variables from Docker file
+Another way to provide variables to your Airflow pipelines is to create environment variables from the Docker file.
+```python
+
+```
+## ENVIRONMENT VARIABLES
+## SECRET BACKEND
+
 ## References
 1. [Get Docker (Docker Offical Documentation)](https://docs.docker.com/desktop/install/ubuntu/)
 2. [Overview of installing Docker Compose (Docker Offical Documentation)](https://docs.docker.com/compose/install/)
