@@ -264,6 +264,17 @@ Another way to provide variables to your Airflow pipelines is to create environm
 ## ENVIRONMENT VARIABLES
 ## SECRET BACKEND
 
+
+## Templating with Jinja 2 
+In order to access variables associated to the DAG run runtime, you can use Jinja 2 templates.
+- Describe the logic of capturing runtime variables
+- How to add parameters to Postgres operator with CustomPostgresOperator
+
+## Astronomer Registry
+- Describe Registry and add a few pictures
+
+
+
 ## References
 1. [Get Docker (Docker Offical Documentation)](https://docs.docker.com/desktop/install/ubuntu/)
 2. [Overview of installing Docker Compose (Docker Offical Documentation)](https://docs.docker.com/compose/install/)
