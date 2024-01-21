@@ -270,8 +270,55 @@ In order to access variables associated to the DAG run runtime, you can use Jinj
 - Describe the logic of capturing runtime variables
 - How to add parameters to Postgres operator with CustomPostgresOperator
 
-## Astronomer Registry
+## Sharing data between tasks with XCOMs
+XComs (short for “cross-communications”) are an Airflow resource that allows you to share data between tasks of the same DAG. By default, each task from a DAG run is isolated from rest of tasks. This allows you to deploy Airflow using multiple machines or containers with Celery or Kubernetes.
+
+The way Airflow stores data from XCOMs is through the metadata database (Postgres), using a key-value approach. The way for you to use the XCOM feature is by leveraging the task instance object. Each task instance is associated with a unique set of values for `dag_id`, `task_id`, `execution_date` and `try_number`. Another importante aspect for a task instance is that it always displays a state associated with the task life cycle (`queued`, `running`, `success`, `failed`, and `skipped`). So you can leverage this object to carry data between tasks for your pipeline.
+The original way to implement XCOMs is illustrated bellow:
+```python
+def _extract(ti):
+    partner_name = 'netflix'
+    ti.xcom_push(key='partner_name', value=partner_name)
+
+def _process(ti):
+    partner_name = ti.xcom_pull(key='partner_name', task_id='extract')
+    print(partner_name)
+
+```
+
+Another way to achieve the above XCOM logic is by using the `return` statement:
+```python
+def _extract(ti):
+    partner_name = 'netflix'
+    return partner_name
+
+def _process(ti):
+    partner_name = ti.xcom_pull(task_id='extract')
+    print(partner_name)
+```
+In order to pass multiple values between tasks through XCOM is by using a dictionary as JSON object.
+```python
+def _extract(ti):
+    partner_name = 'netflix'
+    partner_path = '/partners/netflix'
+    return {"partner_name": partner_name, "partner_path": partner_path}
+
+def _process(ti):
+    partner_settings = ti.xcom_pull(task_id='extract')
+    partner_name = partner_settings.get('partner_name')
+    partner_path = partner_settings.get('partner_path')
+    print(partner_name)
+```
+
+
+Important to note that before on Airflow version 1.x each XCOM data was pickled, and on current Airflow version onward, it's serialized. So you need to pass only Python serialized objects as XCOM.
+
+
+## TO DO LIST:
+- Explain to deploy Airflow using Docker Compose locally and compare it to Astro CLI
+- How to use Airflow REST API to do stuff
 - Describe Registry and add a few pictures
+
 
 
 
@@ -281,3 +328,5 @@ In order to access variables associated to the DAG run runtime, you can use Jinj
 3. [Running Airflow in Docker (Apache Airflow Offical Documentation)](https://airflow.apache.org/docs/apache-airflow/stable/howto/docker-compose/index.html)
 4. [Install Astro CLI (Astronomer Docs)](https://docs.astronomer.io/astro/cli/install-cli?tab=linux#install-the-astro-cli)
 5. [Airflow Components (Astronomer)](https://docs.astronomer.io/learn/airflow-components) 
+6. [Apache Airflow Task Instance Guide (Restack)](https://www.restack.io/docs/airflow-knowledge-task-instance-state-machine-example-attributes)
+7. [The Python pickle Module: How to Persist Objects in Python (Real Python)](https://realpython.com/python-pickle-module/)
