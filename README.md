@@ -313,6 +313,15 @@ def _process(ti):
 
 Important to note that before on Airflow version 1.x each XCOM data was pickled, and on current Airflow version onward, it's serialized. So you need to pass only Python serialized objects as XCOM.
 
+### XCOM limitations
+Although XCOMs can be an a handy feature for using through your data pipelines, it has some important limitations:
+1. Size of XCOM
+  - SQlite: 2GB
+  - Postgres: 1GB
+  - MySQL: 64KB
+
+### XCOM backend
+You can define a XCOM backend to replace your Metadata database (remeber that Postgres is the default) with other data stores like AWS S3, in order to have a more robust storage for your XCOMs. But even with an alternative XCOM backed, you need to be careful with the size of your XCOMs, otherwise you would end up with a memory overflow error.
 
 ## TO DO LIST:
 - Explain to deploy Airflow using Docker Compose locally and compare it to Astro CLI
