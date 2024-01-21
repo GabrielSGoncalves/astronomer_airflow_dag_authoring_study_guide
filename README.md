@@ -323,7 +323,53 @@ Although XCOMs can be an a handy feature for using through your data pipelines, 
 ### XCOM backend
 You can define a XCOM backend to replace your Metadata database (remeber that Postgres is the default) with other data stores like AWS S3, in order to have a more robust storage for your XCOMs. But even with an alternative XCOM backed, you need to be careful with the size of your XCOMs, otherwise you would end up with a memory overflow error.
 
+## Creating DAGs with Taskflow API
+The Taskflow API is a new approach (released on Airflow version 2) that enables you to create Python tasks that share XCOM data with a much simpler synthax, which reads more Pythonic. 
+To use it, you need to leverage the Taskflow API decorator over your Python functions, in order for Airflow to understand it. And the second difference when using the Taskflow API is how you define your XCOM arguments, 
+
+One important caveat is that as Taskflow API uses Python operators, you need to make sure you Airflow deploy is using an isolation for workers (Celery or Kubernetes), in order to avoid using the resources of your production machine, ending up with slow processing times or memory errors.
+Let's remember a simple example on how to leverage XCOMs using the old approach:
+```python
+from airflow.decorators import task, dag # you import the Taskflow API decorators
+
+@task.python
+def extract():
+    partner_name = 'netflix'
+    return partner_name
+
+@task.python
+def process():
+    print(partner_name)
+
+with DAG("my_dag",
+    # other DAG parameters
+    ):
+    extract() >> process()
+```
+
+```python
+from airflow.decorators import task, dag # you import the Taskflow API decorators
+
+@task.python
+def extract():
+    partner_name = 'netflix'
+    return partner_name
+
+@task.python
+def process(partner_name):
+    print(partner_name)
+
+@dag(# other DAG parameters except dag_id
+    )
+
+def my_dag():
+    process(extract())
+
+``` 
+
+
 ## TO DO LIST:
+- Brief introduction of the purpose of the tutorial, mention Astronomer DAG Authoring course and DAG 101 white pages
 - Explain to deploy Airflow using Docker Compose locally and compare it to Astro CLI
 - How to use Airflow REST API to do stuff
 - Describe Registry and add a few pictures
