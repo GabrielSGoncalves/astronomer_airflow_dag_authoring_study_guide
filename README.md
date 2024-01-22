@@ -365,7 +365,50 @@ def process(partner_name):
 def my_dag():
     process(extract())
 
-``` 
+```
+By using the mentioned synthax Airflow is extracting the name of your task and DAG from the fuction names, but if you want you can define it by passing a parameter to the decorators.
+```python
+@task.python
+def extract(task_id='extract_defined_name'):
+    partner_name = 'netflix'
+    return partner_name
+```
+Also, another important `task` decorator parameter `multiple_outpus=True` and Airflow would create a separated XCOM value for each key of your returned dictionary.
+```python
+@task.python
+def extract(task_id='extract_defined_name', multiple_outpus=True):
+    partner_name = 'netflix'
+    return {"partner_name": partner_name, "partner_path": partner_path}
+```
+In the example above you would pass a XCOM parameter for `partner_name` and one for `partner_path`.
+And finally, you can use Python type hints to implement the same thing above, in en even more elegant way.
+
+```python
+from type import Dict
+
+@task.python
+def extract() -> Dict[str, str]:
+    partner_name = 'netflix'
+    return {"partner_name": partner_name, "partner_path": partner_path}
+
+@task.python
+def process(partner_name, partner_path):
+    print(partner_name, partner_path)
+
+@dag(# other DAG parameters except dag_id
+    )
+
+def my_dag():
+    partner_settings = extract()
+    process(partner_settings['partner_name'], partner_settings['partner_path'])
+
+```
+
+
+
+
+
+
 
 
 ## TO DO LIST:
