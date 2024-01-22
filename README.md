@@ -404,6 +404,11 @@ def my_dag():
 
 ```
 
+## Grouping Tasks on your DAG
+As you add more tasks and dependencies to your DAGs, it can become difficult to understand with a graph view with so much information. To organize your tasks into groups in order to increase the readability of your graph view, you have two options: SubDAGs (old and suboptimal way) and TaskGroups (new and ideal way). 
+
+### SubDAGs
+
 
 
 
