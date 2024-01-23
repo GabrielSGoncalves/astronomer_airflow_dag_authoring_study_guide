@@ -435,10 +435,16 @@ If you want you can move your TaskGroup to another file to make your DAG file mu
 
 And finally, you can nest TaskGroups, creating one TaskGroup inside the other whenever needed.
 
+## Advanced Airflow Concepts
+In this session we are going to review a few advanced concepts related to Airflow.
 
+### Creating dynamic tasks
+You can create dynamic tasks based on Python objects like lists or dictionaries in order to avoid repeating your code (following the [DRY principle](https://en.wikipedia.org/wiki/Don%27t_repeat_yourself)). But you can it based on the output of tasks, like XCOMs or results returned from an API request. 
+```python
+# Example of dynamic tasks based on dictionary
+```
 
-
-
+### Branching
 
 
 
