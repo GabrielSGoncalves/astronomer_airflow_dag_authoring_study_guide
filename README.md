@@ -1,9 +1,13 @@
 # Astronomer Airflow DAG Authoring Study Guide
-In this repository we are going to explore the content required on the Airflow DAG Authoring Certification exam from Astronomer. The approach is to use the current README file as a guide for exploring the subjects, and also structure a repository to deploy Airflow locally to test core features.
+The goal of this repository is to be a guide for anyone studying for Astronomer Airflow DAG Authoring Certification. 
+
+This study guide follows the [official preparatory course](https://academy.astronomer.io/astronomer-certification-apache-airflow-dag-authoring-preparation) presented by [Marc Lamberty](https://www.linkedin.com/in/marclamberti/), but suggests other references specially [Directed Acyclic Graphs (DAGs): The Definitive Guide](https://www.astronomer.io/ebooks/dags-definitive-guide/), [Astronomer Docs](https://docs.astronomer.io/) and the [Airflow official documentation](https://airflow.apache.org/docs/).
+
+The idea is to review concepts and explore in practice with a local Airflow deployment and DAG creations.
 
 ## A few important notes
 1. During this guide I'm going to use the expression "DAGs" and "data pipelines" as the same concept, as DAGs are abstractions for data pipelines inside Airflow.
-
+astronomer 
 
 ## 1. Installing Docker
 One of the easiest ways to deploy Airflow is through Docker containers. To do it, we first need to install Docker and Docker Compose. The recommended way is by following the official tutorials, for [Docker](https://docs.docker.com/desktop/install/ubuntu/) and for [Docker Compose](https://docs.docker.com/compose/install/). After installing both tools, try the following terminal commands to make sure the installations were successful:
@@ -408,6 +412,29 @@ def my_dag():
 As you add more tasks and dependencies to your DAGs, it can become difficult to understand with a graph view with so much information. To organize your tasks into groups in order to increase the readability of your graph view, you have two options: SubDAGs (old and suboptimal way) and TaskGroups (new and ideal way). 
 
 ### SubDAGs
+- SubDAG definitions
+- Code example with the 'parent_dag.subdag' convention
+- Mixing subDAGs with Taskflow API is confusing!
+
+### TaskGroups
+TaskGroups were introduced in Airflow v2 making grouping tasks much easier than using SubDAGs.
+One important concept is that TaskGroups are just a visual feature, not impacting in the structure of yout DAG. 
+
+
+```python
+# Add Taskgroup code logic here
+
+
+```
+
+The other way to call TaskGroups is by using its decorator:
+```python
+# decorator logic
+```
+If you want you can move your TaskGroup to another file to make your DAG file much cleaner. You would only need to import yout TaskGroup function and pass it to the DAG instance.
+
+And finally, you can nest TaskGroups, creating one TaskGroup inside the other whenever needed.
+
 
 
 
@@ -417,7 +444,7 @@ As you add more tasks and dependencies to your DAGs, it can become difficult to 
 
 
 ## TO DO LIST:
-- Brief introduction of the purpose of the tutorial, mention Astronomer DAG Authoring course and DAG 101 white pages
+
 - Explain to deploy Airflow using Docker Compose locally and compare it to Astro CLI
 - How to use Airflow REST API to do stuff
 - Describe Registry and add a few pictures
