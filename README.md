@@ -457,6 +457,18 @@ def _choosing_partner_based_on_day(execution_date):
 
 ```
 ### Trigger rules
+A trigger rule defines the premises your DAG must reach in order for a specific task to be triggered. In other words, it's the states the upstream tasks must display for a specific task to execute.
+
+The default parameter for your Operators is `trigger_rule='all_sucess'`, meaning that all upstream tasks must suceed in order for this tasks to be triggered. Other available parameters can be:
+- `all_failed`: Trigger the task if all parents tasks have failed
+- `all_done`: Trigger the task whenever all parents tasks have finished running, without worrying about it succeding or failing.
+- `one_failed`: Trigger the task whenever one parent task fails
+- `one_success`: Trigger the task whenever one parent task succeds
+- `none_failed`: Trigger the task whenever only if parents tasks are not displaying failed
+- `none_skipped`: Trigger the task whenever only if parents tasks were not skipped
+- `none_failed_or_skipped`: Trigger the task whenever only if parents tasks were not skipped or failed
+- `dummy`: Does not impose any trigger rule
+
 
 
 ## TO DO LIST:
