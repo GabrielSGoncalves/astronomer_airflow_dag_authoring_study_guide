@@ -445,8 +445,18 @@ You can create dynamic tasks based on Python objects like lists or dictionaries 
 ```
 
 ### Branching
+Branching is a feature that allows you to define different paths for your data pipeline based on conditions. There are a few available operators for performing branching like `BranchSQLOperator`, `BranchDateTimeOperator`, and others (see the list on [here](https://docs.astronomer.io/learn/airflow-branch-operator)), but in general the most used is the `BranchPythonOperator`.
 
+The way you implement branching on your DAGs is by creating a function that returns different values of task_ids names you want to execute in the next step, and pass it to the selected branch operator.
+```python
+def _choosing_partner_based_on_day(execution_date):
+   day = execution_date.day_of_week
 
+   if day == 1:
+      return 'extract_partner_snowflake1
+
+```
+### Trigger rules
 
 
 ## TO DO LIST:
@@ -454,6 +464,7 @@ You can create dynamic tasks based on Python objects like lists or dictionaries 
 - Explain to deploy Airflow using Docker Compose locally and compare it to Astro CLI
 - How to use Airflow REST API to do stuff
 - Describe Registry and add a few pictures
+- Add session on ShortCircuit operator on branching
 
 
 
@@ -466,3 +477,4 @@ You can create dynamic tasks based on Python objects like lists or dictionaries 
 5. [Airflow Components (Astronomer)](https://docs.astronomer.io/learn/airflow-components) 
 6. [Apache Airflow Task Instance Guide (Restack)](https://www.restack.io/docs/airflow-knowledge-task-instance-state-machine-example-attributes)
 7. [The Python pickle Module: How to Persist Objects in Python (Real Python)](https://realpython.com/python-pickle-module/)
+8. [Branching in Airflow](https://docs.astronomer.io/learn/airflow-branch-operator)
