@@ -469,7 +469,78 @@ The default parameter for your Operators is `trigger_rule='all_sucess'`, meaning
 - `none_failed_or_skipped`: Trigger the task whenever only if parents tasks were not skipped or failed
 - `dummy`: Does not impose any trigger rule
 
+### Defining dependencies
+In order to define dependencies between tasks of your DAG you have a few synthax options.
+The oldest (and less used) is using `set_downstream` and `set_upstream`.
+```python
+with DAG (
+    'dependency', 
+    schedule_interval='@daily', 
+    default_args=default_args, 
+    catchup=False
+    ) as dag:
 
+    t1 = DummyOperator(task_id='t1')
+    t2 = DummyOperator(task_id='t1')
+    
+    t1.set_downstream(t2) # one way 
+    t2.set_upstream(t1)  # or the other
+```
+Or using the bit shift operators, which is much the most used approach.
+
+```python
+with DAG (
+    'dependency', 
+    schedule_interval='@daily', 
+    default_args=default_args, 
+    catchup=False
+    ) as dag:
+
+    t1 = DummyOperator(task_id='t1')
+    t2 = DummyOperator(task_id='t1')
+    
+    t1 >> t2
+```
+If you have a situation that you want to implement dependencies between two lists of tasks (like `[t1, t2] >> [t3, t4]), the bit shift operator won't allow you to do it, an error would be raised. In order to do it, you need to leverage the `cross_downstream` function.
+```python
+from airflow.models.basdeoperator import cross_downstream
+with DAG (
+    'dependency', 
+    schedule_interval='@daily', 
+    default_args=default_args, 
+    catchup=False
+    ) as dag:
+
+    t1 = DummyOperator(task_id='t1')
+    t2 = DummyOperator(task_id='t2')
+    t3 = DummyOperator(task_id='t3')
+    t4 = DummyOperator(task_id='t4')
+    t5 = DummyOperator(task_id='t5')
+    t6 = DummyOperator(task_id='t6')
+    t7 = DummyOperator(task_id='t7')
+
+    cross_downstream([t1, t2, t3], [t4, t5, t6])
+    [t4, t5, t6] >> t7
+```
+And finally, you can use the `chain` function to implement dependencies.
+```python
+from airflow.models.basdeoperator import chain
+with DAG (
+    'dependency', 
+    schedule_interval='@daily', 
+    default_args=default_args, 
+    catchup=False
+    ) as dag:
+
+    t1 = DummyOperator(task_id='t1')
+    t2 = DummyOperator(task_id='t2')
+    t3 = DummyOperator(task_id='t3')
+    t4 = DummyOperator(task_id='t4')
+    t5 = DummyOperator(task_id='t5')
+    t6 = DummyOperator(task_id='t6')
+
+    chain(t1, [t2, t3], [t4, t5], t6)
+```
 
 ## TO DO LIST:
 
