@@ -481,7 +481,7 @@ with DAG (
     ) as dag:
 
     t1 = DummyOperator(task_id='t1')
-    t2 = DummyOperator(task_id='t1')
+    t2 = DummyOperator(task_id='t2')
     
     t1.set_downstream(t2) # one way 
     t2.set_upstream(t1)  # or the other
@@ -576,7 +576,27 @@ with DAG (
 ### Pools
 Pools are a feature that allows you define groups of worker slots in order to prioritize specific tasks. By default you have a `default_pool` with 128 slots, but you can change this value and create new pools with the size you want, always thinking about the resources you have available for your Airflow deployment. The reason you use pools is to control the concurrency of specific groups of tasks, isolating the resources (workers) from the other pools.
 
+### Defining priorities to critical tasks
+Whenever you need to give a priority to specific tasks on your DAG you can change the `priority_weight` parameter of it operator to a different value. By default, `priority_weight=1`, so you can increase this value to set a higher priority.
+```python
+with DAG (
+    'priority', 
+    schedule_interval='@daily', 
+    default_args=default_args, 
+    catchup=False
+    ) as dag:
 
+    t1 = DummyOperator(task_id='t1')
+    t2 = DummyOperator(task_id='t2', priority_weight=2)
+    t3 = DummyOperator(task_id='t3', priority_weight=1)
+    t4 = DummyOperator(task_id='t4')
+    
+    t1 >> [t2, t3] >> t4
+```
+The example above we would have a priority execution of t2 over t3.
+One thing to remember about `priority_weight` is that it's define on a pool level, so if you have tasks belonging to different pools, the priority will follow it's respective pool.
+
+You can also define how the weights of your tasks are computed in the context of your DAG called `weight_rule`. This DAG parameter has a default `weight_rule=downstream` and the effective weight of the task is the aggregate sum of all downstream descendants. You can also have it set to `weight_rule=uptream`, we the opposite effect to default. And `weight_rule=absolute`, with the effective weight being the exact `priority_weight`.
 
 ## TO DO LIST:
 
