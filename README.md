@@ -541,6 +541,40 @@ with DAG (
 
     chain(t1, [t2, t3], [t4, t5], t6)
 ```
+### Parallelism, concurrency and related parameters
+There are a few parameters that you can specify at the Airflow level, changing parameters on `airflow.cfg` file, in order to control concurrency of tasks, DAGs and DAG runs:
+- `parallelism`: The maximum number of tasks that can be executed at the same time on your Airflow instance (default=32).
+- `dag_concurrency`: The maximum number of tasks that can be executed at same time for any given DAG(default=16).
+- `max_active_runs_per_dag`: The maximum number of runs that can be executed at same time for any given DAG (default=16).
+If you want to set the parameters on a DAG level, you have the option to define `concurrency`, maximun number of tasks running at the same time for all DAG runs, and `max_active_runs`.
+ 
+```python
+with DAG (
+    'dependency', 
+    schedule_interval='@daily', 
+    default_args=default_args, 
+    catchup=False,
+    concurrency=2,
+    max_active_runs=1
+    ) as dag:
+    
+    # ...
+```
+And finally, you can also set the parameters `task_concurrency` on a task level, to have even more control over your data pipelines.
+
+```python
+with DAG (
+    'dependency', 
+    schedule_interval='@daily', 
+    default_args=default_args, 
+    catchup=False,
+    ) as dag:
+    
+    t1 = DummyOperator(task_id='t1', task_concurrency=1)
+```
+
+### Pools
+
 
 ## TO DO LIST:
 
