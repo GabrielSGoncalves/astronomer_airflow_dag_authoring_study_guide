@@ -598,6 +598,11 @@ One thing to remember about `priority_weight` is that it's define on a pool leve
 
 You can also define how the weights of your tasks are computed in the context of your DAG called `weight_rule`. This DAG parameter has a default `weight_rule=downstream` and the effective weight of the task is the aggregate sum of all downstream descendants. You can also have it set to `weight_rule=uptream`, we the opposite effect to default. And `weight_rule=absolute`, with the effective weight being the exact `priority_weight`.
 
+### Defining dependencies between DAG runs
+In some cases, it's important that your data pipelines must only be executed if the previous run was successful (or skipped). In Airflow you can control this on the your task level with the parameter `depends_on_past=True`. Whenever set to `True`, every task run will only be triggered if the the same task on the previous was successful. One important thing about this control is that you can't control it at a DAG level, only at the task level. For example, if you have a pipeline with `t1 >> t2 >> t3` and during the first run t3 failed, in the next DAG run, you would still have `t1` and `t2` triggered, but not `t3`. In this case, `t3` won't have a task state and your DAG would be stuck (don't forget to define a timeout for your DAG, or you'll have a DAG "running" forever).
+
+Another way for you to control the execution of a DAG run based on the previouns run is through the use of the operator parameter `wait_for_downstream=True`. With this parameter set to `True` your task will only be triggered if the immediately downstream of the previous run to be finish successfully or be skipped. Important to note this parameter only consider the immediately downstream of the previous task instance.
+
 ## TO DO LIST:
 
 - Explain to deploy Airflow using Docker Compose locally and compare it to Astro CLI
