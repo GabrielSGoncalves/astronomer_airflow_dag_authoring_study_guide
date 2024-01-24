@@ -574,6 +574,8 @@ with DAG (
 ```
 
 ### Pools
+Pools are a feature that allows you define groups of worker slots in order to prioritize specific tasks. By default you have a `default_pool` with 128 slots, but you can change this value and create new pools with the size you want, always thinking about the resources you have available for your Airflow deployment. The reason you use pools is to control the concurrency of specific groups of tasks, isolating the resources (workers) from the other pools.
+
 
 
 ## TO DO LIST:
