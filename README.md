@@ -603,6 +603,16 @@ In some cases, it's important that your data pipelines must only be executed if 
 
 Another way for you to control the execution of a DAG run based on the previouns run is through the use of the operator parameter `wait_for_downstream=True`. With this parameter set to `True` your task will only be triggered if the immediately downstream of the previous run to be finish successfully or be skipped. Important to note this parameter only consider the immediately downstream of the previous task instance.
 
+### Sensors
+Sensors are task operators that have a waiting state the only changes when a pre-defined condition changes to `True`, before moving to the next task. There are a few different sensors, like `S3KeySensor`, `DateTimeSensor`, `ExternalTaskSensor`, `HttpSensor` and `SqlSensor` but they all derive from the base class `BaseSensorOperator`, sharing a few parameters:
+- `mode`: Can be set to `poke` to occupy a worker slot during the waiting time, or `reschedule` to release the worker slot and add the task to the pool queue again.
+- `poke_interval`: The frequency in seconds the sensor checks for the condition (default is 60 seconds).
+- `exponential_backoff`: If `True`, every new poke interval is exponentially longer than the before.
+- `timeout`: The maximun amount of the sensor is set to wait before raising an fail error.
+- `soft_fail`: If set to `True`, when `timeout` is reached, the tasks is skipped instead of failing.
+
+
+
 ## TO DO LIST:
 
 - Explain to deploy Airflow using Docker Compose locally and compare it to Astro CLI
