@@ -663,6 +663,16 @@ To implement SLAs on your tasks, you need to define the parameter `sla` with a `
 Important to notice that you need to configure the SMTP server and email parameters for your DAG to receive the SLA missed callback message. More information on how to do it can be found in the [Astronomer Manage Airflow DAG notifications Documentation](https://docs.astronomer.io/learn/error-notifications-in-airflow#email-notifications).
 And finally, if you trigger you DAGs manually, the SLA won't be checked, only when it follows the schedule date.
 
+### DAG versioning
+Airflow has some limitations in term of DAG versioning. Let's see each type of update you can have with yout DAGs to decide how to proper deal with limitations.
+
+1. **Updating task code/logic:** Whenever you update the code of a task what's going to happen is that new task instances are going to be executed with this new logic. So the only problem that you may have is when looking at logs from previous task instances, the output of the log won't be correlated with the current state of the `< > Code` tab.
+2. **Adding new tasks:** Whenever new tasks are added to your DAG, Airflow display empty tasks squares related to new task on the grid tab. But in practical terms, you won't have problems with future executions.
+3. **Removing tasks from your DAG:** This is the most problematic, as the removed task information and its logs from would not be accessible anymore. So you should avoid it at all cost.
+
+A good practice to try to implement a rudimentary version system to your DAGs is by adding a sufix to the `dag_id` with the versioning convention `1_0_0`. So whenever you change something that might be critical to your DAG, you simply replace the `dagname_1_0_0`, with `dagname_1_0_1`, and a new DAG would be created, keeping the old version saved. Just don't forget to turn off the old DAG, and turn on the new one.
+
+### Dynamic DAGs
 
 ## TO DO LIST:
 
@@ -670,7 +680,7 @@ And finally, if you trigger you DAGs manually, the SLA won't be checked, only wh
 - How to use Airflow REST API to do stuff
 - Describe Registry and add a few pictures
 - Add session on ShortCircuit operator on branching
-
+- Add code for SLA
 
 
 
