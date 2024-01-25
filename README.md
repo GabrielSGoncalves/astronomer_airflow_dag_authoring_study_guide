@@ -633,6 +633,15 @@ with DAG (
     t1 >> t2
 ```
 
+### Callbacks
+Callbacks are a feature from both DAGs and tasks that can be triggered in case of reaching specific state like `success` or `failure`.
+At the DAG level you can define a both of the parameters `on_sucess_callback` or `on_failure_callback` and the argument that you need to pass is a function that gets called in each case.
+
+At the task level, you have an extra parameter for callback called `on_retry_callback` to be used whenever a retry is executed on that task.
+
+```python
+# add callback examples here
+```
 
 
 ## TO DO LIST:
