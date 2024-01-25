@@ -611,6 +611,28 @@ Sensors are task operators that have a waiting state the only changes when a pre
 - `timeout`: The maximun amount of the sensor is set to wait before raising an fail error.
 - `soft_fail`: If set to `True`, when `timeout` is reached, the tasks is skipped instead of failing.
 
+You can find more valuable information abour sensors on [Astronomer sensors documentation](https://docs.astronomer.io/learn/what-is-a-sensor?tab=traditional#example-implementation).
+
+### Setting timeouts for your DAGs and tasks
+It's a best practice to always set timeouts for every DAG you create to avoid having problems with wasted resources (workers) with long running DAGs. To do it you define the parameter `dagrun_timeout` just like the example below. You can also specify the timeout at the task level with the parameter `execution_timeout`.
+```python
+from datetime import timedelta
+
+
+with DAG (
+    'timeout', 
+    schedule_interval='@daily', 
+    default_args=default_args, 
+    catchup=False,
+    dagrun_timeout=timedelta(minutes=15)
+    ) as dag:
+
+    t1 = DummyOperator(task_id='t1',execution_timeout=timedelta(minutes=10))
+    t2 = DummyOperator(task_id='t1',execution_timeout=timedelta(minutes=10))
+    
+    t1 >> t2
+```
+
 
 
 ## TO DO LIST:
@@ -632,3 +654,4 @@ Sensors are task operators that have a waiting state the only changes when a pre
 6. [Apache Airflow Task Instance Guide (Restack)](https://www.restack.io/docs/airflow-knowledge-task-instance-state-machine-example-attributes)
 7. [The Python pickle Module: How to Persist Objects in Python (Real Python)](https://realpython.com/python-pickle-module/)
 8. [Branching in Airflow](https://docs.astronomer.io/learn/airflow-branch-operator)
+9. [Airflow sensors (Astronomer)](https://docs.astronomer.io/learn/what-is-a-sensor?tab=traditional#example-implementation)
