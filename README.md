@@ -649,6 +649,19 @@ You can define the parameter `retries` on your DAG or tasks instances, and by de
 To define the time your tasks must wait before retrying you can set the parameter `retry_delay` (the default is `300` seconds, 5 minutes).
 The `retry_exponential_backoff` parameter doubles your retry delay time on every round (example, 5 minutes, 10 minutes, 20 minuted, ...) and `max_retry_delay` sets the maximun time your can retry reach when doubling.
 
+### SLAs
+Service Level Agreements are a kind of contracts associated to digital products that states specific behaviours it's suppose to display. The idea behind of SLAs is to stablish a threshold of specific metrics so that the customer can verify if it's suitable for the intended use.
+
+In the case of your DAG, you define an SLA for the maximun time it's supposed to run, and if this threshold is reached, Airflow sends you a message stating all the informations about it.
+
+To implement SLAs on your tasks, you need to define the parameter `sla` with a `datetime.delta` object. And in order to receive the message, you must create a custom function and pass it to your DAG parameter `sla_miss_callback`.
+
+```python
+# add code for sla callback function and parameter definition
+```
+
+Important to notice that you need to configure the SMTP server and email parameters for your DAG to receive the SLA missed callback message. More information on how to do it can be found in the [Astronomer Manage Airflow DAG notifications Documentation](https://docs.astronomer.io/learn/error-notifications-in-airflow#email-notifications).
+And finally, if you trigger you DAGs manually, the SLA won't be checked, only when it follows the schedule date.
 
 
 ## TO DO LIST:
@@ -671,3 +684,4 @@ The `retry_exponential_backoff` parameter doubles your retry delay time on every
 7. [The Python pickle Module: How to Persist Objects in Python (Real Python)](https://realpython.com/python-pickle-module/)
 8. [Branching in Airflow](https://docs.astronomer.io/learn/airflow-branch-operator)
 9. [Airflow sensors (Astronomer)](https://docs.astronomer.io/learn/what-is-a-sensor?tab=traditional#example-implementation)
+10. [Manage Airflow DAG notifications (Astronomer)](https://docs.astronomer.io/learn/error-notifications-in-airflow#email-notifications)
