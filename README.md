@@ -643,6 +643,13 @@ At the task level, you have an extra parameter for callback called `on_retry_cal
 # add callback examples here
 ```
 
+### Levereging retries
+Retries are useful parameters that enables you to have a better control over the behaviour of your DAGs and tasks. Specially for tasks that are accessing external service like API, it might be a good idea to define a retry value in order to execute it more than once if there's a problem with connection.
+You can define the parameter `retries` on your DAG or tasks instances, and by default it follows the value that's set on the `airflow.cfg` file on `default_task_retry` (CHECK THIS PARAMETER).
+To define the time your tasks must wait before retrying you can set the parameter `retry_delay` (the default is `300` seconds, 5 minutes).
+The `retry_exponential_backoff` parameter doubles your retry delay time on every round (example, 5 minutes, 10 minutes, 20 minuted, ...) and `max_retry_delay` sets the maximun time your can retry reach when doubling.
+
+
 
 ## TO DO LIST:
 
