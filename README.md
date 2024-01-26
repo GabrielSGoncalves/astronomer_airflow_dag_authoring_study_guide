@@ -1,7 +1,7 @@
 # Astronomer Airflow DAG Authoring Study Guide
 The goal of this repository is to be a guide for anyone studying for Astronomer Airflow DAG Authoring Certification. 
 
-This study guide follows the [official preparatory course](https://academy.astronomer.io/astronomer-certification-apache-airflow-dag-authoring-preparation) presented by [Marc Lamberty](https://www.linkedin.com/in/marclamberti/), but suggests other references specially [Directed Acyclic Graphs (DAGs): The Definitive Guide](https://www.astronomer.io/ebooks/dags-definitive-guide/), [Astronomer Docs](https://docs.astronomer.io/) and the [Airflow official documentation](https://airflow.apache.org/docs/).
+This study guide follows the [official preparatory course](https://academy.astronomer.io/astronomer-certification-apache-airflow-dag-authoring-preparation) presented by [Marc Lamberty](https://www.linkedin.com/in/marclamberti/), and also other references specially [Directed Acyclic Graphs (DAGs): The Definitive Guide](https://www.astronomer.io/ebooks/dags-definitive-guide/), [Astronomer Docs](https://docs.astronomer.io/) and the [Airflow official documentation](https://airflow.apache.org/docs/).
 
 The idea is to review concepts and explore in practice with a local Airflow deployment and DAG creations.
 
@@ -9,7 +9,7 @@ The idea is to review concepts and explore in practice with a local Airflow depl
 1. During this guide I'm going to use the expression "DAGs" and "data pipelines" as the same concept, as DAGs are abstractions for data pipelines inside Airflow.
 astronomer 
 
-## 1. Installing Docker
+## Installing Docker
 One of the easiest ways to deploy Airflow is through Docker containers. To do it, we first need to install Docker and Docker Compose. The recommended way is by following the official tutorials, for [Docker](https://docs.docker.com/desktop/install/ubuntu/) and for [Docker Compose](https://docs.docker.com/compose/install/). After installing both tools, try the following terminal commands to make sure the installations were successful:
 ```bash
 docker --version
@@ -76,7 +76,7 @@ Use "astro [command] --help" for more information about a command.
 
 ```
 
-## 3. Creating a repository for local Airflow deployment
+## Creating a repository for local Airflow deployment
 After installing all the required tools mentioned above (Docker, Docker Compose and Astro CLI) we are ready for structuring our local repository. To do it, you first can create a new folder (I named my `astronomer_airflow_dag_authoring_study_guide`), that we are going to use as our repository folder:
 ```bash
 mkdir airflow_dag_authoring_study_guide
@@ -679,12 +679,49 @@ But in situations where you need to create multiple DAGs with the same structure
 
 In general, you should follow a convention for all your team dynamic DAGs, in order to organize the pipeline in a way it could be easier to understand and fix whenever need. 
 
-One way to do it is the **Single-ile Method**, when the logic of your dynamic DAGs can be found in just one DAG file. You usually use a loop to create the DAGs dynamically, iterating over a Python iterable object (dictionaries, lists, etc). But you can also have accessory config files, like YAML or JSON with the settings for each DAG to be generated dynamically.
+One way to do it is the **Single-file Method**, when the logic of your dynamic DAGs can be found in just one DAG file. You usually use a loop to create the DAGs dynamically, iterating over a Python iterable object (dictionaries, lists, etc). But you can also have accessory config files, like YAML or JSON with the settings for each DAG to be generated dynamically.
 The drawback of this approach is that all DAGs are regenerated every time the Airflow Scheduler parses the DAG files (it may impact your Airflow performance), you can't see the code from the generated DAG through the UI and also if you change the number of generated DAGs, you'll have DAGs on the UI that no longer exists. So although this way is easy to implement, it might be hard to maintain.
 
 The other way is the **Multi-file Method**, where you create programatically one DAG file for each DAG you want to deploy. To do it, you can create a script that iterates through the Python iterator object (similar to the other approach), and creates new DAG files based on a template. This script can be stored outside the dag folder, and you can execute it manually or within your CI/CD pipeline.
 
-## Triggering your DAGs from external resources
+### Triggering your DAGs from external resources
+Until this point, we have covered a few ways to schedule your DAGs based on a schedule, but in some cases, you may want to trigger it based on external events. 
+The first way you can implement it is by leveraging the `ExternalTaskSensor`. This sensor is dependent on the state of tasks from another DAG from your Airflow instance, and it might be a good way to chain DAGs to each other, applying the tasks dependecies concept to DAGs. 
+Let's take a look at a simple example to understand how to implement the `ExternalTaskSensor`.
+Imagine we have a DAG (let's call it `dag1`) with three tasks `extract`, `transform` and `load` that performs a simple ETL process. And you want to trigger a second DAG `dag2` whenever `dag1` has successfully finished executing. This is how you would implement it for your `dag2`.
+
+```python
+# ... all the other relevant imports
+from airflow.sensors.external_task import ExternalTaskSensor
+
+default_args = {
+    "owner" : "airflow",
+    "start_date" : datetime(2024, 1, 1)
+}
+
+with DAG(
+    dag_id="dag2",
+    default_args=default_args,
+    schedule_interval="@daily",
+    catchup=False
+) as dag:
+    
+    waiting_for_task = ExternalTaskSensor(
+        task_id="waiting_for_task",
+        external_dag_id="dag1",
+        external_task_id="load",
+    )
+
+    run_sql_query = PostgresOperator(
+        # ... Postgres parameters
+    )
+
+    waiting_for_task >> run_sql_query
+```
+One important thing to remember is that the DAGs must share the same `schedule_interval`, as the `ExternalTaskSensor` is a sensor that waits for the success of an external DAG task with the same `execution_date`. If `dag1` run does not complete in 7 days (default), your task `waiting_for_task` from `dag2` will timeout.
+If you want to have different `execution_dates` for your dependent DAGs, you can define the parameter `execution_delta` on your `ExternalTaskSensor`. For more complex behaviours you might use the parameter `execution_date_fn`.
+One last thing to rememeber about `ExternalTaskSensor` is that it's you need to define the success and failed stated that your task is waiting for `failed_states=['failed', 'skipped']` and `allowed_states=['success']`.
+For more details on how to define your parameters for `ExternalTaskSensor`, please refer to [Astronomer Registry ExternalTaskSensor documentation](https://registry.astronomer.io/providers/apache-airflow/versions/latest/modules/externaltasksensor).
 
 
 ## TO DO LIST:
@@ -708,3 +745,4 @@ The other way is the **Multi-file Method**, where you create programatically one
 8. [Branching in Airflow](https://docs.astronomer.io/learn/airflow-branch-operator)
 9. [Airflow sensors (Astronomer)](https://docs.astronomer.io/learn/what-is-a-sensor?tab=traditional#example-implementation)
 10. [Manage Airflow DAG notifications (Astronomer)](https://docs.astronomer.io/learn/error-notifications-in-airflow#email-notifications)
+11. [Astronomer Registry ExternalTaskSensor documentation](https://registry.astronomer.io/providers/apache-airflow/versions/latest/modules/externaltasksensor)
