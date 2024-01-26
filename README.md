@@ -664,15 +664,28 @@ Important to notice that you need to configure the SMTP server and email paramet
 And finally, if you trigger you DAGs manually, the SLA won't be checked, only when it follows the schedule date.
 
 ### DAG versioning
-Airflow has some limitations in term of DAG versioning. Let's see each type of update you can have with yout DAGs to decide how to proper deal with limitations.
+Airflow has some limitations in term of DAG versioning. Let's see each type of update you can make on your DAGs to decide how to proper deal with limitations.
 
 1. **Updating task code/logic:** Whenever you update the code of a task what's going to happen is that new task instances are going to be executed with this new logic. So the only problem that you may have is when looking at logs from previous task instances, the output of the log won't be correlated with the current state of the `< > Code` tab.
-2. **Adding new tasks:** Whenever new tasks are added to your DAG, Airflow display empty tasks squares related to new task on the grid tab. But in practical terms, you won't have problems with future executions.
+2. **Adding new tasks:** Whenever new tasks are added to your DAG, Airflow display empty tasks squares related to new task on the grid tab for old DAG runs. But in practical terms, you won't have problems with future executions.
 3. **Removing tasks from your DAG:** This is the most problematic, as the removed task information and its logs from would not be accessible anymore. So you should avoid it at all cost.
 
 A good practice to try to implement a rudimentary version system to your DAGs is by adding a sufix to the `dag_id` with the versioning convention `1_0_0`. So whenever you change something that might be critical to your DAG, you simply replace the `dagname_1_0_0`, with `dagname_1_0_1`, and a new DAG would be created, keeping the old version saved. Just don't forget to turn off the old DAG, and turn on the new one.
 
 ### Dynamic DAGs
+One way of thinking about your DAGs and it's respective DAG file is that there usually a relation of 1 to 1. And that you DAG file should be treated as a configuration file for your data pipeline. 
+
+But in situations where you need to create multiple DAGs with the same structure, just changing a few parameters, you might try using a dynamic DAG approach to create them. 
+
+In general, you should follow a convention for all your team dynamic DAGs, in order to organize the pipeline in a way it could be easier to understand and fix whenever need. 
+
+One way to do it is the **Single-ile Method**, when the logic of your dynamic DAGs can be found in just one DAG file. You usually use a loop to create the DAGs dynamically, iterating over a Python iterable object (dictionaries, lists, etc). But you can also have accessory config files, like YAML or JSON with the settings for each DAG to be generated dynamically.
+The drawback of this approach is that all DAGs are regenerated every time the Airflow Scheduler parses the DAG files (it may impact your Airflow performance), you can't see the code from the generated DAG through the UI and also if you change the number of generated DAGs, you'll have DAGs on the UI that no longer exists. So although this way is easy to implement, it might be hard to maintain.
+
+The other way is the **Multi-file Method**, where you create programatically one DAG file for each DAG you want to deploy. To do it, you can create a script that iterates through the Python iterator object (similar to the other approach), and creates new DAG files based on a template. This script can be stored outside the dag folder, and you can execute it manually or within your CI/CD pipeline.
+
+## Triggering your DAGs from external resources
+
 
 ## TO DO LIST:
 
