@@ -686,6 +686,8 @@ The other way is the **Multi-file Method**, where you create programatically one
 
 ### Triggering your DAGs from external resources
 Until this point, we have covered a few ways to schedule your DAGs based on a schedule, but in some cases, you may want to trigger it based on external events. 
+
+#### ExternalTaskSensor
 The first way you can implement it is by leveraging the `ExternalTaskSensor`. This sensor is dependent on the state of tasks from another DAG from your Airflow instance, and it might be a good way to chain DAGs to each other, applying the tasks dependecies concept to DAGs. 
 Let's take a look at a simple example to understand how to implement the `ExternalTaskSensor`.
 Imagine we have a DAG (let's call it `dag1`) with three tasks `extract`, `transform` and `load` that performs a simple ETL process. And you want to trigger a second DAG `dag2` whenever `dag1` has successfully finished executing. This is how you would implement it for your `dag2`.
@@ -722,6 +724,47 @@ One important thing to remember is that the DAGs must share the same `schedule_i
 If you want to have different `execution_dates` for your dependent DAGs, you can define the parameter `execution_delta` on your `ExternalTaskSensor`. For more complex behaviours you might use the parameter `execution_date_fn`.
 One last thing to rememeber about `ExternalTaskSensor` is that it's you need to define the success and failed stated that your task is waiting for `failed_states=['failed', 'skipped']` and `allowed_states=['success']`.
 For more details on how to define your parameters for `ExternalTaskSensor`, please refer to [Astronomer Registry ExternalTaskSensor documentation](https://registry.astronomer.io/providers/apache-airflow/versions/latest/modules/externaltasksensor).
+
+#### TriggerDagRunOperator
+Whenever you want to trigger another DAG run from a task from a different DAG you can use `TriggerDagRunOperator`. For example, imagine that you want to trigger `dag2` from `dag1` task `trigger_dag2`, this is how you would implement it.
+```python
+from airflow.operator.trigger_dagrun import TriggerDagRunOperator
+
+default_args = {
+    "owner" : "airflow",
+    "start_date" : datetime(2024, 1, 1)
+}
+
+with DAG(
+    dag_id="dag1",
+    default_args=default_args,
+    schedule_interval="@daily",
+    catchup=False
+) as dag:
+
+    start = DummyOperator(task_id='start')
+    
+    trigger_dag2 = TriggerDagRunOperator(
+        task_id="trigger_dag2",
+        trigger_dag_id="dag2",
+        execution_date='{{ ds }}',
+        wait_for_completion=True,
+        poke_interval=60,
+        reset_dag_run=True,
+        failed_states=['failed']
+    )
+
+    start >> trigger_dag2
+```
+About the `TriggerDagRunOperator` parameters:
+- `trigger_dag_id`: The name of the DAG you want to trigger
+- `execution_date`: The execution date you are triggering the other DAG. You may use Jinja templates (`{{ ds }}`)
+- `wait_for_completion`: If set to `True`, your current task will wait for the completion of the external triggered DAG
+- `poke_interval`: When waiting for the completion of the external DAG, which frequency your `TriggerDagRunOperator` is checking for its completion
+- `reset_dag_run`: If set to `True` you can trigger DAGs that were already executed on the `execution_date`,
+        failed_states=['failed']
+
+
 
 
 ## TO DO LIST:
